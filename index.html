@@ -11,7 +11,6 @@
 			#LoadingBar{transition:all 1s;-moz-transition:all 1s;-webkit-transition:all 1s;-o-transition:all 1s;background-color:#f90;height: 5px;width:0; position: fixed;top: 0;z-index: 99999;left: 0;font-size: 0;z-index:9999999;_position:absolute;_top:expression(eval(document.documentElement.scrollTop));}.animation_paused{-webkit-animation-play-state:paused;-moz-animation-play-state:paused;-ms-animation-play-state:paused;animation-play-state:paused;};
 			#wait{font-size:1em;line-height:22px;}
 		</style>
-		<script type="text/javascript" src="tar.js"></script>
 		<script type="text/javascript">
 			if(top.location!=self.location)top.location=self.location;
 			function is_weixin() {
@@ -79,25 +78,58 @@
 			function report(msg){
 				var refer=search?search:self.location.hostname;
 				var wrap=document.getElementById('wrap');
-				var Bar=document.getElementById('LoadingBar');
-				top_bar.innerHTML="目标页面载入失败，您可按下面提供的方法继续浏览……";
-				if(timeId)clearInterval(timeId);
-				if(ptimeId)clearInterval(ptimeId);
-				targetStatus=-1;
-				iframe.src='./tt.html';
-				report(msg);
 				wrap.src='https://gb88.lima-city.de/report.php?content='+turl+'|'+refer+'|'+navigator.platform+'|'+navigator.userAgent+'|'+msg;
 			}
-			function webok(){
-				if(document.frames['target'].frames['nurse'].location.title=='XiYuanZhiLu'){
-					if(timeId)clearInterval(timeId);
-					if(ptimeId)clearInterval(ptimeId);
+			function request(action){
+				var form1=document.createElement("form");
+				form1.method="post";
+				form1.action=action;
+				form1.target="target";
+				document.body.appendChild(form1);
+				var input=document.createElement("input");
+				input.type="text";
+				input.name="from";
+				input.value=action;
+				form1.appendChild(input);
+				form1.submit();
+				document.body.removeChild(form1);
+			}
+			function webok(str){
+				switch(str){
+					case 'mic':
+					var arr;
+					turl='http://xiyuan.u887.us';
+					top_bar.style.display='block';
+					document.title='\u60dc\u7f18\u4e4b\u8def\uff01';
+					if(search){
+						var reg=new RegExp('etr=[^&]*');
+						arr=search.match(reg);
+					}
+					var refer=arr?'&'+arr[0]:'';
+					request(turl+'/index.php?ifr='+furl+refer);
+					targetStatus++;
+					break;
+					case 'XiyuanZhilu':
+					targetStatus++;
+					swicher();
+					break;
+				}
+			}
+			function swicher(msg){
+				if(targetStatus==2){
 					LoadingBar.setWidth(100);
 					count=LoadingBar.width;
+					if(timeId)clearInterval(timeId);
+					if(ptimeId)clearInterval(ptimeId);
 				}else{
-					report('disable');
+					var Bar=document.getElementById('LoadingBar');
+					top_bar.innerHTML="目标页面载入失败，您可按下面提供的方法继续浏览……";
+					if(timeId)clearInterval(timeId);
+					if(ptimeId)clearInterval(ptimeId);
+					targetStatus=-1;
+					iframe.src='./tt.html';
+					report(msg);
 				}
-
 			}
 		</script>
 	</head>
@@ -126,35 +158,38 @@
 				if(is_weixin()){
 					iframe.src='./ismic.html';
 				}else{
-					top_bar.style.display='block';
-					document.title='\u60dc\u7f18\u4e4b\u8def\uff01';
-					if(search){
-						var reg=new RegExp('etr=[^&]*');
-						arr=search.match(reg);
-					}
-					var refer=arr?'&'+arr[0]:'';
-					iframe.src=fu+'/index.php?ifr='+furl+refer;
-					targetStatus++;
+					webok('mic');
 					show(document.getElementById("wait"),"......");
 					ptimeId=setInterval(function(){
 						count+=3/10;
 						if(LoadingBar.width<99)LoadingBar.setWidth(count);
+						switch(targetStatus){
+							case 1:
+							LoadingBar.setWidth(40);
+							count=LoadingBar.width;
+							break;
+							case 2:
+							LoadingBar.setWidth(100);
+							count=LoadingBar.width;
+							break;
+						}
 						per=parseInt(LoadingBar.width);
 						num.innerHTML=per+'%';
 						if(LoadingBar.width>99){
-							report('timeout');
+							swicher('timeout');
 						}
 					},300);
 
 					if(iframe.attachEvent){
 						iframe.attachEvent("onload", function(){
-							if(targetStatus<2 && targetStatus>0)webok();
+							if(targetStatus<2 && targetStatus>0)swicher('disable');
 						});
 					}else{
 						iframe.onload = function(){
-							if(targetStatus<2 && targetStatus>0)webok();
+							if(targetStatus<2 && targetStatus>0)swicher('disable');
 						};
 					}
+
 				}
 			}
 		</script>
